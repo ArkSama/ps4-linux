@@ -1145,9 +1145,8 @@ amdgpu_pci_shutdown(struct pci_dev *pdev)
 	 * torn down properly on reboot/shutdown.
 	 * unfortunately we can't detect certain
 	 * hypervisors so just do this all the time.
-						
-Disbale shutdown = no kernelpanic on reboot
-	amdgpu_device_ip_suspend(adev);*/
+	*/					
+	amdgpu_device_ip_suspend(adev);
 }
 
 static int amdgpu_pmops_suspend(struct device *dev)
