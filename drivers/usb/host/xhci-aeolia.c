@@ -279,7 +279,7 @@ static struct pci_driver xhci_aeolia_driver = {
 	.remove =	xhci_aeolia_remove,
 	/* suspend and resume implemented later */
 
-	.shutdown = 	xhci_hcd_pci_shutdown,
+	.shutdown = 	usb_hcd_pci_shutdown,
 #ifdef CONFIG_PM_SLEEP
 	.driver = {
 		.pm = &xhci_aeolia_pm_ops
