@@ -267,7 +267,7 @@ static int hidp_get_raw_report(struct hid_device *hid,
 	set_bit(HIDP_WAITING_FOR_RETURN, &session->flags);
 	data[0] = report_number;
 	ret = hidp_send_ctrl_message(session, report_type, data, 1);
-	if (ret)
+	if (ret < 0)
 		goto err;
 
 	/* Wait for the return of the report. The returned report
@@ -343,7 +343,7 @@ static int hidp_set_raw_report(struct hid_device *hid, unsigned char reportnum,
 	data[0] = reportnum;
 	set_bit(HIDP_WAITING_FOR_SEND_ACK, &session->flags);
 	ret = hidp_send_ctrl_message(session, report_type, data, count);
-	if (ret)
+	if (ret < 0)
 		goto err;
 
 	/* Wait for the ACK from the device. */
@@ -855,12 +855,12 @@ static int hidp_session_dev_add(struct hidp_session *session)
 
 	if (session->hid) {
 		ret = hid_add_device(session->hid);
-		if (ret)
+		if (ret < 0)
 			return ret;
 		get_device(&session->hid->dev);
 	} else if (session->input) {
 		ret = input_register_device(session->input);
-		if (ret)
+		if (ret < 0)
 			return ret;
 		input_get_device(session->input);
 	}
@@ -956,7 +956,7 @@ static int hidp_session_new(struct hidp_session **out, const bdaddr_t *bdaddr,
 	init_waitqueue_head(&session->report_queue);
 
 	ret = hidp_session_dev_init(session, req);
-	if (ret)
+	if (ret < 0)
 		goto err_free;
 
 	get_file(session->intr_sock->file);
@@ -1115,12 +1115,12 @@ static int hidp_session_probe(struct l2cap_conn *conn,
 
 	if (session->input) {
 		ret = hidp_session_dev_add(session);
-		if (ret)
+		if (ret < 0)
 			goto out_unlock;
 	}
 
 	ret = hidp_session_start_sync(session);
-	if (ret)
+	if (ret < 0)
 		goto out_del;
 
 	/* HID device registration is async to allow I/O during probe */
@@ -1355,7 +1355,7 @@ int hidp_connection_add(const struct hidp_connadd_req *req,
 	int ret;
 
 	ret = hidp_verify_sockets(ctrl_sock, intr_sock);
-	if (ret)
+	if (ret < 0)
 		return ret;
 
 	if (req->flags & ~valid_flags)
@@ -1373,11 +1373,11 @@ int hidp_connection_add(const struct hidp_connadd_req *req,
 
 	ret = hidp_session_new(&session, &chan->dst, ctrl_sock,
 			       intr_sock, req, conn);
-	if (ret)
+	if (ret < 0)
 		goto out_conn;
 
 	ret = l2cap_register_user(conn, &session->user);
-	if (ret)
+	if (ret < 0)
 		goto out_session;
 
 	ret = 0;
